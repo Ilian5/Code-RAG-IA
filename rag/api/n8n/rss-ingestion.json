@@ -1,0 +1,225 @@
+{
+  "id": "rag-rss-ingestion",
+  "name": "RAG — RSS Ingestion",
+  "nodes": [
+    {
+      "id": "node-schedule",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "hours", "hoursInterval": 6 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "node-sources",
+      "name": "Sources",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "parameters": {
+        "jsCode": "return [\n  { feed_url: 'https://hnrss.org/frontpage?points=200', source_name: 'Hacker News' },\n  { feed_url: 'https://stackoverflow.blog/feed/',         source_name: 'Stack Overflow Blog' },\n  { feed_url: 'https://github.blog/feed/',                source_name: 'GitHub Blog' },\n  { feed_url: 'https://blog.cloudflare.com/rss/',         source_name: 'Cloudflare Blog' },\n  { feed_url: 'https://medium.com/feed/netflix-techblog',  source_name: 'Netflix Tech Blog' },\n  { feed_url: 'https://martinfowler.com/feed.atom',       source_name: 'Martin Fowler' },\n  { feed_url: 'https://dev.to/feed',                      source_name: 'dev.to' },\n  { feed_url: 'https://highscalability.com/rss/',         source_name: 'High Scalability' },\n  { feed_url: 'https://huggingface.co/blog/feed.xml',     source_name: 'Hugging Face' },\n  { feed_url: 'https://lwn.net/headlines/rss',            source_name: 'LWN.net' }\n].map(s => ({ json: s }));"
+      }
+    },
+    {
+      "id": "node-loop",
+      "name": "Loop over sources",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [680, 300],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "node-rss",
+      "name": "RSS Read",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [900, 380],
+      "parameters": {
+        "url": "={{ $json.feed_url }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-extract-url",
+      "name": "Extract URL",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1120, 380],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "u", "name": "url", "value": "={{ $json.link || $json.url }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-check-db",
+      "name": "URL already ingested?",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [1340, 380],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1 AS exists FROM articles WHERE url = $1 LIMIT 1",
+        "options": {
+          "queryReplacement": "={{ $json.url }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "postgres-news",
+          "name": "Postgres news DB"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "node-if-new",
+      "name": "Is new?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1560, 380],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-1",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "",
+              "operator": { "type": "object", "operation": "empty", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-build",
+      "name": "Build Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1780, 280],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "a1", "name": "url",          "value": "={{ $('RSS Read').item.json.link || $('RSS Read').item.json.url }}",      "type": "string" },
+            { "id": "a2", "name": "title",        "value": "={{ $('RSS Read').item.json.title }}",                                    "type": "string" },
+            { "id": "a3", "name": "source",       "value": "={{ $('Loop over sources').item.json.source_name }}",                     "type": "string" },
+            { "id": "a4", "name": "author",       "value": "={{ $('RSS Read').item.json.creator || $('RSS Read').item.json.author || '' }}",         "type": "string" },
+            { "id": "a5", "name": "published_at", "value": "={{ $('RSS Read').item.json.isoDate || $('RSS Read').item.json.pubDate || '' }}",        "type": "string" },
+            { "id": "a6", "name": "summary_rss",  "value": "={{ $('RSS Read').item.json.contentSnippet || $('RSS Read').item.json.summary || '' }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-fetch",
+      "name": "Fetch HTML",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 280],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "User-Agent", "value": "Mozilla/5.0 (compatible; RAG-aggregator/1.0)" },
+            { "name": "Accept", "value": "text/html,application/xhtml+xml" }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "neverError": true
+            }
+          },
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "id": "node-ingest",
+      "name": "Ingest API (writes Qdrant + Postgres)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2220, 280],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "http://rag-api:8000/api/articles/ingest",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ url: $('Build Payload').item.json.url, title: $('Build Payload').item.json.title, content_html: $json.data || '', source: $('Build Payload').item.json.source, author: $('Build Payload').item.json.author, published_at: $('Build Payload').item.json.published_at, summary_rss: $('Build Payload').item.json.summary_rss }) }}",
+        "options": {
+          "timeout": 120000,
+          "response": { "response": { "neverError": true } }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [[{ "node": "Sources", "type": "main", "index": 0 }]]
+    },
+    "Sources": {
+      "main": [[{ "node": "Loop over sources", "type": "main", "index": 0 }]]
+    },
+    "Loop over sources": {
+      "main": [
+        [],
+        [{ "node": "RSS Read", "type": "main", "index": 0 }]
+      ]
+    },
+    "RSS Read": {
+      "main": [[{ "node": "Extract URL", "type": "main", "index": 0 }]]
+    },
+    "Extract URL": {
+      "main": [[{ "node": "URL already ingested?", "type": "main", "index": 0 }]]
+    },
+    "URL already ingested?": {
+      "main": [[{ "node": "Is new?", "type": "main", "index": 0 }]]
+    },
+    "Is new?": {
+      "main": [
+        [{ "node": "Build Payload", "type": "main", "index": 0 }],
+        [{ "node": "Loop over sources", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Payload": {
+      "main": [[{ "node": "Fetch HTML", "type": "main", "index": 0 }]]
+    },
+    "Fetch HTML": {
+      "main": [[{ "node": "Ingest API (writes Qdrant + Postgres)", "type": "main", "index": 0 }]]
+    },
+    "Ingest API (writes Qdrant + Postgres)": {
+      "main": [[{ "node": "Loop over sources", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true
+  },
+  "versionId": "2"
+}

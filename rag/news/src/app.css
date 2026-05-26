@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { font-family: Inter, system-ui, sans-serif; }
+  a { color: inherit; }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-bg text-text text-sm transition-colors hover:bg-bg-mut;
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-md bg-accent text-white text-sm font-medium hover:bg-blue-700 transition-colors;
+  }
+  .btn-icon {
+    @apply p-1.5;
+  }
+  .btn-danger {
+    @apply text-danger border-border hover:bg-danger-bg;
+  }
+  .card {
+    @apply bg-bg border border-border rounded-md p-5 shadow-soft;
+  }
+  .input {
+    @apply w-full bg-bg text-text border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent-bg;
+  }
+  .chip {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full bg-bg-mut text-text-mut text-xs border border-border;
+  }
+  .chip-unread {
+    @apply chip bg-accent-bg text-accent border-accent/30;
+  }
+  .chip-starred {
+    @apply chip bg-amber-50 text-amber-700 border-amber-200;
+  }
+}

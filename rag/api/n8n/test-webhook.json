@@ -1,0 +1,40 @@
+{
+  "id": "test-webhook-only",
+  "name": "Test Webhook Only",
+  "nodes": [
+    {
+      "id": "wh",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "8c1a4f00-0000-0000-0000-000000000001",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "test-only",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "rp",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [500, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, echo: $json.body }) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Respond", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {"executionOrder": "v1"},
+  "active": false,
+  "versionId": "1"
+}

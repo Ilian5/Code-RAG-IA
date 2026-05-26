@@ -1,0 +1,107 @@
+{
+  "id": "tech-news-chat-agent",
+  "name": "Tech News Chat Agent",
+  "nodes": [
+    {
+      "id": "node-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "601b0b08-a6a0-42a0-b3d7-553d526a5f8c",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat-news",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-ollama",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [380, 560],
+      "parameters": {
+        "model": "llama3.2:3b",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "credentials": {
+        "ollamaApi": {
+          "id": "ollama-local",
+          "name": "Ollama Local"
+        }
+      }
+    },
+    {
+      "id": "node-mcp",
+      "name": "MCP — structured queries",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [560, 560],
+      "parameters": {
+        "endpointUrl": "http://mcp-server:8001/mcp",
+        "serverTransport": "httpStreamable",
+        "authentication": "none",
+        "include": "all"
+      }
+    },
+    {
+      "id": "node-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [560, 300],
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.question }}",
+        "options": {
+          "systemMessage": "Tu es un assistant qui aide à explorer une base d'articles tech (Hacker News, Cloudflare, GitHub Blog, Stack Overflow Blog, Netflix Tech, Martin Fowler, dev.to, LWN.net, Hugging Face, High Scalability) indexés automatiquement.\n\nTu disposes de plusieurs outils MCP :\n- list_articles : lister avec filtres (source, depuis_X_jours, non_lus, étoilés)\n- count_by_source : compter par source\n- count_unread : compter les non lus\n- recent_articles : derniers articles publiés\n- articles_in_date_range : articles entre deux dates\n- get_article : détail d'un article par URL\n- retrieve_articles : recherche sémantique vectorielle pour les questions ouvertes (\"que disent les articles sur X\")\n\nRègles :\n- Comptage / listing / filtrage par métadonnée → outils structurés (list_articles, count_*, articles_in_date_range)\n- Question sémantique ouverte → retrieve_articles puis synthétise toi-même depuis les chunks\n- Cite tes sources entre crochets sous la forme [Source — Titre]\n- Réponds en français, sois concis et factuel\n- Si aucun article n'est pertinent, dis-le clairement"
+        }
+      }
+    },
+    {
+      "id": "node-respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [880, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ answer: $json.output, sources: [] }) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "AI Agent", "type": "main", "index": 0 }]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [{ "node": "Respond to Webhook", "type": "main", "index": 0 }]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]
+      ]
+    },
+    "MCP — structured queries": {
+      "ai_tool": [
+        [{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true
+  },
+  "active": false,
+  "versionId": "2"
+}

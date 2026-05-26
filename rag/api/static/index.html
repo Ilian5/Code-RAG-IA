@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RAG Admin</title>
+<link rel="preconnect" href="https://rsms.me">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></symbol>
+    <symbol id="i-rss" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.5 9A9 9 0 0 1 19.4 6L23 10"/><path d="M20.5 15A9 9 0 0 1 4.6 18L1 14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></symbol>
+  </defs>
+</svg>
+
+<div class="container">
+
+  <header>
+    <div class="brand">
+      <div class="brand-name">RAG <span>Admin</span></div>
+    </div>
+    <nav class="tabs">
+      <button data-tab="overview" class="active">Overview</button>
+      <button data-tab="documents">Documents</button>
+      <button data-tab="articles">Articles</button>
+      <button data-tab="search">Search</button>
+      <button data-tab="inspect">Inspect</button>
+      <button data-tab="system">System</button>
+    </nav>
+  </header>
+
+  <!-- ===== Overview ===== -->
+  <section class="section active" id="tab-overview">
+    <div class="stats">
+      <div class="stat"><div class="label">Document chunks</div><div class="value" id="ov-doc-chunks">—</div><div class="sub" id="ov-doc-chunks-sub"></div></div>
+      <div class="stat"><div class="label">Documents</div><div class="value" id="ov-docs">—</div></div>
+      <div class="stat"><div class="label">Article chunks</div><div class="value" id="ov-art-chunks">—</div></div>
+      <div class="stat"><div class="label">Inbox</div><div class="value" id="ov-inbox">—</div><div class="sub">PDFs en attente</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Services</h2>
+      <div class="status-row" id="ov-services"></div>
+    </div>
+
+    <div class="card">
+      <h2>Modèles Ollama</h2>
+      <div id="ov-models" class="empty">Chargement…</div>
+    </div>
+  </section>
+
+  <!-- ===== Documents ===== -->
+  <section class="section" id="tab-documents">
+    <div class="card">
+      <h2>Uploader un PDF</h2>
+      <div class="dropzone" id="dropzone">
+        <p>Glisser un fichier PDF ici, ou cliquer pour parcourir</p>
+        <input type="file" id="upload-input" accept=".pdf" hidden>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Inbox <span class="hint" id="doc-inbox-count"></span></h2>
+      <div id="doc-inbox" class="empty">Chargement…</div>
+    </div>
+
+    <div class="card">
+      <h2>Documents indexés <span class="hint" id="doc-processed-count"></span></h2>
+      <div id="doc-processed" class="empty">Chargement…</div>
+    </div>
+  </section>
+
+  <!-- ===== Articles ===== -->
+  <section class="section" id="tab-articles">
+    <div class="stats">
+      <div class="stat"><div class="label">Articles</div><div class="value" id="art-count">—</div></div>
+      <div class="stat"><div class="label">Sources</div><div class="value" id="art-sources-count">—</div></div>
+      <div class="stat"><div class="label">Chunks</div><div class="value" id="art-chunks">—</div></div>
+      <div class="stat"><div class="label">Mots indexés</div><div class="value" id="art-words">—</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Sources</h2>
+      <div id="art-sources-table" class="empty">Chargement…</div>
+    </div>
+
+    <div class="card">
+      <h2>Tester une URL <span class="hint">extraction sans stockage</span></h2>
+      <div class="form-row inline">
+        <input type="url" id="art-test-url" placeholder="https://blog.cloudflare.com/...">
+        <button class="btn-primary" id="art-test-btn">Extraire</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Articles récents</h2>
+      <div class="form-row cols-3" style="margin-bottom:14px">
+        <div>
+          <label>Source</label>
+          <select id="art-list-source"><option value="">Toutes</option></select>
+        </div>
+        <div>
+          <label>Depuis (jours)</label>
+          <input type="number" id="art-list-since" min="0" max="365" value="0" placeholder="0 = tous">
+        </div>
+        <div>
+          <label>Limite</label>
+          <input type="number" id="art-list-limit" min="10" max="200" value="50">
+        </div>
+      </div>
+      <button class="btn" id="art-list-load">Charger</button>
+      <div id="art-list" style="margin-top:14px" class="empty">Charger pour afficher les articles.</div>
+    </div>
+
+    <div class="card">
+      <h2>Doublons <span class="hint">articles avec contenu identique</span></h2>
+      <button class="btn" id="art-dup-load">Vérifier</button>
+      <div id="art-dup" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card">
+      <h2>Maintenance</h2>
+      <div class="btn-group">
+        <button class="btn btn-danger" id="art-clear-all">Vider la base d'articles</button>
+        <button class="btn btn-danger" id="art-clear-source">Vider une source…</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Search ===== -->
+  <section class="section" id="tab-search">
+    <div class="card">
+      <h2>Interroger</h2>
+      <div class="form-row">
+        <label>Cible</label>
+        <div class="radio-row" id="search-target">
+          <label><input type="radio" name="target" value="documents" checked><span>Documents</span></label>
+          <label><input type="radio" name="target" value="articles"><span>Articles</span></label>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="search-q">Question</label>
+        <textarea id="search-q" placeholder="Pose ta question…"></textarea>
+      </div>
+      <div class="form-row cols-3">
+        <div>
+          <label>Top-K : <span class="range-value" id="search-k-val">5</span></label>
+          <input type="range" id="search-k" min="1" max="15" value="5">
+        </div>
+        <div id="search-source-cell" style="display:none">
+          <label>Filtrer par source</label>
+          <select id="search-source"><option value="">Toutes</option></select>
+        </div>
+        <div id="search-since-cell" style="display:none">
+          <label>Depuis (jours, 0 = tous)</label>
+          <input type="number" id="search-since" min="0" max="365" value="0">
+        </div>
+      </div>
+      <button class="btn-primary" id="search-submit">Lancer la recherche</button>
+    </div>
+
+    <div class="card" id="search-result" style="display:none">
+      <h2>Réponse</h2>
+      <div id="search-answer"></div>
+      <h2 style="margin-top:18px">Sources</h2>
+      <div id="search-sources"></div>
+    </div>
+  </section>
+
+  <!-- ===== Inspect ===== -->
+  <section class="section" id="tab-inspect">
+    <div class="card">
+      <h2>Inspecter les chunks</h2>
+      <div class="form-row cols-3">
+        <div>
+          <label>Type</label>
+          <select id="insp-type">
+            <option value="documents">Documents</option>
+            <option value="articles">Articles</option>
+          </select>
+        </div>
+        <div>
+          <label>Source / fichier</label>
+          <select id="insp-source"><option value="">Tous</option></select>
+        </div>
+        <div>
+          <label>Limite</label>
+          <input type="number" id="insp-limit" min="1" max="500" value="50">
+        </div>
+      </div>
+      <div class="form-row inline">
+        <input type="text" id="insp-filter" placeholder="Filtrer le texte des chunks (côté client)…">
+        <button class="btn-primary" id="insp-load">Charger</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Chunks <span class="hint" id="insp-count"></span></h2>
+      <div id="insp-chunks" class="empty">Lancer une recherche pour afficher les chunks.</div>
+    </div>
+  </section>
+
+  <!-- ===== System ===== -->
+  <section class="section" id="tab-system">
+    <div class="card">
+      <h2>Configuration</h2>
+      <div class="scroll-x"><table id="cfg-table"><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <h2>Maintenance</h2>
+      <div class="btn-group">
+        <button class="btn btn-danger" id="sys-clear-docs">Vider la collection documents</button>
+        <button class="btn" id="sys-reingest-all">Réingérer tous les PDFs</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Logs <span class="hint" id="sys-logs-status"></span></h2>
+      <div class="form-row cols-3" style="margin-bottom:12px">
+        <div>
+          <label>Niveau</label>
+          <select id="sys-logs-level">
+            <option value="">Tous</option>
+            <option value="INFO">INFO+</option>
+            <option value="WARNING">WARN+</option>
+            <option value="ERROR">ERROR uniquement</option>
+          </select>
+        </div>
+        <div>
+          <label>Lignes</label>
+          <input type="number" id="sys-logs-count" min="10" max="500" value="150">
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <label style="font-size:13px;color:var(--text)">
+            <input type="checkbox" id="sys-logs-auto" checked> Auto-refresh 5s
+          </label>
+        </div>
+      </div>
+      <div class="logs" id="sys-logs"></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="modal-backdrop" id="modal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title"></h3>
+      <button class="modal-close" id="modal-close" aria-label="Fermer"><svg class="icon"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

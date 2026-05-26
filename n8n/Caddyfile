@@ -1,0 +1,131 @@
+# ============ n8n ============
+{$N8N_DOMAIN} {
+    encode gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    handle /webhook/* {
+        reverse_proxy n8n:5678
+    }
+
+    handle /webhook-test/* {
+        reverse_proxy n8n:5678
+    }
+
+    handle {
+        basic_auth {
+            {$BASIC_AUTH_N8N_USER} {$BASIC_AUTH_N8N_HASH}
+        }
+        reverse_proxy n8n:5678
+    }
+}
+
+# ============ RAG ============
+{$RAG_DOMAIN} {
+    encode gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+    }
+
+    basic_auth {
+        {$BASIC_AUTH_RAG_USER} {$BASIC_AUTH_RAG_HASH}
+    }
+
+    reverse_proxy rag-api:8000
+}
+
+# ============ News aggregator ============
+{$NEWS_DOMAIN} {
+    encode gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    basic_auth {
+        {$BASIC_AUTH_RAG_USER} {$BASIC_AUTH_RAG_HASH}
+    }
+
+    # /api/chat hits the n8n agent workflow (orchestration via webhook).
+    @chat path /api/chat
+    handle @chat {
+        rewrite * /webhook/chat-news
+        reverse_proxy n8n:5678
+    }
+
+    # All other /api/* hits go to the rag-api backend (CRUD news, articles, etc.).
+    @api path /api/*
+    handle @api {
+        reverse_proxy rag-api:8000
+    }
+
+    # Everything else is the static SvelteKit build.
+    handle {
+        root * /srv/news
+        try_files {path} /index.html
+        file_server
+    }
+}
+
+# ============ MCP server ============
+{$MCP_DOMAIN} {
+    encode gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+    }
+
+    basic_auth {
+        {$BASIC_AUTH_RAG_USER} {$BASIC_AUTH_RAG_HASH}
+    }
+
+    reverse_proxy mcp-server:8001
+}
+
+# ============ Adminer (Postgres GUI) ============
+{$DB_DOMAIN} {
+    encode gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+    }
+
+    basic_auth {
+        {$BASIC_AUTH_RAG_USER} {$BASIC_AUTH_RAG_HASH}
+    }
+
+    reverse_proxy adminer:8080
+}
+
+# ============ Qdrant dashboard ============
+{$QDRANT_DOMAIN} {
+    encode gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+    }
+
+    basic_auth {
+        {$BASIC_AUTH_RAG_USER} {$BASIC_AUTH_RAG_HASH}
+    }
+
+    # Qdrant dashboard lives at /dashboard, the API is at /
+    # Both are served from the same port. We expose root → user accesses /dashboard.
+    reverse_proxy qdrant:6333
+}
